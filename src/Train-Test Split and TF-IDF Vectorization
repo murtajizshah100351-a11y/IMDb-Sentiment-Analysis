@@ -1,0 +1,23 @@
+print("Splitting data into train and test sets...")
+X_train, X_test, y_train, y_test = train_test_split(
+    df['review_cleaned'],
+    df['sentiment_binary'],
+    test_size=0.2,
+    random_state=42,
+    stratify=df['sentiment_binary']
+)
+
+print(f"✓ Data split complete")
+print(f"  Training set size: {len(X_train)}")
+print(f"  Test set size: {len(X_test)}")
+print(f"  Training positive samples: {y_train.sum()}")
+print(f"  Training negative samples: {len(y_train) - y_train.sum()}")
+
+print("\nVectorizing text to TF-IDF...")
+vectorizer = TfidfVectorizer(max_features=5000, max_df=0.95, min_df=2)
+X_train_tfidf = vectorizer.fit_transform(X_train)
+X_test_tfidf = vectorizer.transform(X_test)
+
+print(f"✓ TF-IDF vectorization complete")
+print(f"  Feature matrix shape: {X_train_tfidf.shape}")
+print(f"  Number of features: {len(vectorizer.get_feature_names_out())}")
