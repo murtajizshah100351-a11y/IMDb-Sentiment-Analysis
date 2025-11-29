@@ -1,0 +1,13 @@
+import time
+
+print("="*70)
+print("TRAINING BASELINE MODELS (PAPER IMPLEMENTATION)")
+print("="*70)
+
+print("\n2. Training Decision Tree...")
+start_time = time.time()
+dt_model = DecisionTreeClassifier(random_state=42)
+dt_model.fit(X_train_tfidf, y_train)
+dt_pred = dt_model.predict(X_test_tfidf)
+dt_time = time.time() - start_time
+print(f"   ✓ Decision Tree trained in {dt_time:.2f}s")
