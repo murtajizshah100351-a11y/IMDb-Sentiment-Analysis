@@ -1,0 +1,65 @@
+print("="*70)
+print("BAR CHARTS OF MODEL PERFORMANCE METRICS")
+print("="*70)
+
+fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+
+models = results_df['Model']
+colors = ['#3498db', '#e74c3c', '#2ecc71']
+
+# Plot 1: Accuracy
+ax1 = axes[0, 0]
+bars1 = ax1.bar(models, results_df['Accuracy'], color=colors, edgecolor='black', linewidth=1.5)
+ax1.set_ylabel('Accuracy', fontsize=14, fontweight='bold')
+ax1.set_title('Model Accuracy Comparison', fontsize=16, fontweight='bold')
+ax1.set_ylim([0.7, 1.0])
+ax1.grid(axis='y', alpha=0.3)
+for i, (bar, v) in enumerate(zip(bars1, results_df['Accuracy'])):
+    height = bar.get_height()
+    ax1.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+             f'{v:.4f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax1.tick_params(axis='x', rotation=15)
+
+# Plot 2: Precision
+ax2 = axes[0, 1]
+bars2 = ax2.bar(models, results_df['Precision'], color=colors, edgecolor='black', linewidth=1.5)
+ax2.set_ylabel('Precision', fontsize=14, fontweight='bold')
+ax2.set_title('Model Precision Comparison', fontsize=16, fontweight='bold')
+ax2.set_ylim([0.7, 1.0])
+ax2.grid(axis='y', alpha=0.3)
+for i, (bar, v) in enumerate(zip(bars2, results_df['Precision'])):
+    height = bar.get_height()
+    ax2.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+             f'{v:.4f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax2.tick_params(axis='x', rotation=15)
+
+# Plot 3: Recall
+ax3 = axes[1, 0]
+bars3 = ax3.bar(models, results_df['Recall'], color=colors, edgecolor='black', linewidth=1.5)
+ax3.set_ylabel('Recall', fontsize=14, fontweight='bold')
+ax3.set_title('Model Recall Comparison', fontsize=16, fontweight='bold')
+ax3.set_ylim([0.7, 1.0])
+ax3.grid(axis='y', alpha=0.3)
+for i, (bar, v) in enumerate(zip(bars3, results_df['Recall'])):
+    height = bar.get_height()
+    ax3.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+             f'{v:.4f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax3.tick_params(axis='x', rotation=15)
+
+# Plot 4: F1-Score
+ax4 = axes[1, 1]
+bars4 = ax4.bar(models, results_df['F1-Score'], color=colors, edgecolor='black', linewidth=1.5)
+ax4.set_ylabel('F1-Score', fontsize=14, fontweight='bold')
+ax4.set_title('Model F1-Score Comparison', fontsize=16, fontweight='bold')
+ax4.set_ylim([0.7, 1.0])
+ax4.grid(axis='y', alpha=0.3)
+for i, (bar, v) in enumerate(zip(bars4, results_df['F1-Score'])):
+    height = bar.get_height()
+    ax4.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+             f'{v:.4f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax4.tick_params(axis='x', rotation=15)
+
+plt.tight_layout()
+plt.savefig('/content/drive/MyDrive/model_performance_bar_charts.png', dpi=300, bbox_inches='tight')
+print("✓ Bar charts saved to Google Drive")
+plt.show()
