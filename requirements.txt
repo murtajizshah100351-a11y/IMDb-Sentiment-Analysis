@@ -1,0 +1,9 @@
+------Exact packages must be used------ 
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+joblib
+nltk
+jupyter
