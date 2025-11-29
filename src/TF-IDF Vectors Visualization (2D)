@@ -1,0 +1,40 @@
+print("="*70)
+print("TF-IDF VECTORS VISUALIZATION (2D)")
+print("="*70)
+
+# Use PCA to reduce TF-IDF vectors to 2D
+print("\nReducing TF-IDF vectors to 2D using PCA...")
+pca = PCA(n_components=2, random_state=42)
+X_train_2d = pca.fit_transform(X_train_tfidf.toarray())
+
+print(f"✓ PCA complete")
+print(f"  Explained variance: {pca.explained_variance_ratio_.sum():.4f}")
+
+# Visualize
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Sample 20 points for visualization
+sample_size = 20
+sample_indices = np.random.choice(len(X_train_2d), size=min(sample_size, len(X_train_2d)), replace=False)
+X_sample = X_train_2d[sample_indices]
+y_sample = y_train.iloc[sample_indices].values
+
+# Plot positive and negative reviews
+positive_mask = y_sample == 1
+negative_mask = y_sample == 0
+
+ax.scatter(X_sample[positive_mask, 0], X_sample[positive_mask, 1], 
+           c='green', label='Positive', alpha=0.7, s=60)
+ax.scatter(X_sample[negative_mask, 0], X_sample[negative_mask, 1], 
+           c='red', label='Negative', alpha=0.7, s=60)
+
+ax.set_xlabel('First Principal Component', fontsize=12)
+ax.set_ylabel('Second Principal Component', fontsize=12)
+ax.set_title('TF-IDF Vector Visualization in 2D (PCA)', fontsize=14, fontweight='bold')
+ax.legend(fontsize=12)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig('/content/drive/MyDrive/tfidf_2d_visualization.png', dpi=300, bbox_inches='tight')
+print("\n✓ TF-IDF visualization saved to Google Drive")
+plt.show()
