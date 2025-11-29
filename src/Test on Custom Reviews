@@ -1,0 +1,45 @@
+def predict_sentiment(review_text, model, vectorizer):
+    cleaned_review = clean_text(review_text)
+    vectorized = vectorizer.transform([cleaned_review])
+    prediction = model.predict(vectorized)[0]
+    
+    try:
+        probability = model.predict_proba(vectorized)[0]
+        confidence = max(probability) * 100
+    except:
+        confidence = 100
+    
+    sentiment = "POSITIVE" if prediction == 1 else "NEGATIVE"
+    
+    return sentiment, confidence
+
+if best_model_idx == 0:
+    best_trained_model = lr_model
+    model_name = "Logistic Regression"
+elif best_model_idx == 1:
+    best_trained_model = dt_model
+    model_name = "Decision Tree"
+else:
+    best_trained_model = rf_model
+    model_name = "Random Forest"
+
+print("="*70)
+print("TEST ON CUSTOM REVIEWS")
+print(f"Using Best Model: {model_name}")
+print("="*70)
+
+test_reviews = [
+    "This movie was absolutely fantastic! I loved every minute of it.",
+    "Horrible movie. Waste of time and money. Very disappointed.",
+    "It was okay, nothing special but entertaining enough.",
+    "Best film I've ever seen! Masterpiece!",
+    "Boring and predictable. I fell asleep halfway through."
+]
+
+for i, review in enumerate(test_reviews, 1):
+    sentiment, confidence = predict_sentiment(review, best_trained_model, vectorizer)
+    print(f"\nReview {i}:")
+    print(f"Text: {review}")
+    print(f"Prediction: {sentiment} (Confidence: {confidence:.2f}%)")
+
+print("\n✓ All tests completed!")
