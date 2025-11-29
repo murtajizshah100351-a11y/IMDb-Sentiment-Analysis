@@ -1,0 +1,35 @@
+import zipfile
+import os
+
+zip_path = '/content/drive/MyDrive/IMDB_Dataset.csv.zip'
+
+print("Extracting dataset...")
+extract_path = '/content/IMDb_dataset'
+os.makedirs(extract_path, exist_ok=True)
+
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    zip_ref.extractall(extract_path)
+
+print("✓ Dataset extracted")
+
+csv_files = [f for f in os.listdir(extract_path) if f.endswith('.csv')]
+print(f"Found CSV files: {csv_files}")
+
+csv_file = os.path.join(extract_path, csv_files[0])
+print(f"\nLoading dataset from: {csv_file}")
+df = pd.read_csv(csv_file)
+
+print("\n" + "="*70)
+print("DATASET INFORMATION")
+print("="*70)
+print(f"Dataset Shape: {df.shape}")
+print(f"Columns: {df.columns.tolist()}")
+print("\nFirst 5 rows:")
+print(df.head())
+print("\nDataset Info:")
+print(df.info())
+print("\nSentiment Distribution:")
+print(df['sentiment'].value_counts())
+print(f"\nPositive Reviews: {(df['sentiment'] == 'positive').sum()}")
+print(f"Negative Reviews: {(df['sentiment'] == 'negative').sum()}")
+print("\n✓ Dataset loaded successfully")
