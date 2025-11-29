@@ -1,0 +1,40 @@
+def evaluate_model(y_true, y_pred, model_name):
+    accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred)
+    
+    print(f"\n{model_name}:")
+    print(f"  Accuracy:  {accuracy:.4f}")
+    print(f"  Precision: {precision:.4f}")
+    print(f"  Recall:    {recall:.4f}")
+    print(f"  F1-Score:  {f1:.4f}")
+    
+    return {
+        'Model': model_name,
+        'Accuracy': accuracy,
+        'Precision': precision,
+        'Recall': recall,
+        'F1-Score': f1
+    }
+
+print("="*70)
+print("BASELINE MODEL EVALUATION RESULTS")
+print("="*70)
+
+results = []
+results.append(evaluate_model(y_test, lr_pred, "Logistic Regression"))
+results.append(evaluate_model(y_test, dt_pred, "Decision Tree"))
+results.append(evaluate_model(y_test, rf_pred, "Random Forest"))
+
+results_df = pd.DataFrame(results)
+print("\n" + "="*70)
+print("SUMMARY TABLE:")
+print("="*70)
+print(results_df.to_string(index=False))
+
+best_model_idx = results_df['F1-Score'].idxmax()
+best_model_name = results_df.loc[best_model_idx, 'Model']
+best_accuracy = results_df.loc[best_model_idx, 'Accuracy']
+print(f"\n✓ Best Baseline Model: {best_model_name}")
+print(f"  Accuracy: {best_accuracy:.4f}")
