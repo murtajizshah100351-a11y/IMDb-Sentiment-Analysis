@@ -1,0 +1,26 @@
+import re
+import nltk
+from nltk.corpus import stopwords
+
+print("Downloading NLTK resources...")
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
+
+def clean_text(text):
+    text = re.sub('<.*?>', '', text)
+    text = re.sub('[^a-zA-Z]', ' ', text)
+    text = text.lower()
+    text = re.sub('\s+', ' ', text).strip()
+    return text
+
+print("Cleaning text (this may take 1-2 minutes)...")
+df['review_cleaned'] = df['review'].apply(clean_text)
+
+df['sentiment_binary'] = (df['sentiment'] == 'positive').astype(int)
+
+print("✓ Data preprocessing complete")
+print("\nSample original review:")
+print(df['review'].iloc[0][:200])
+print("\nSample cleaned review:")
+print(df['review_cleaned'].iloc[0][:200])
+print("\nSentiment:", "POSITIVE" if df['sentiment_binary'].iloc[0] == 1 else "NEGATIVE")
