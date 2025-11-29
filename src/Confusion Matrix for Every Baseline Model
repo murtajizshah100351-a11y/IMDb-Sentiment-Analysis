@@ -1,0 +1,56 @@
+print("="*70)
+print("CONFUSION MATRICES FOR ALL BASELINE MODELS")
+print("="*70)
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+# Confusion Matrix 1: Logistic Regression
+cm_lr = confusion_matrix(y_test, lr_pred)
+ax1 = axes[0]
+sns.heatmap(cm_lr, annot=True, fmt='d', cmap='Blues', ax=ax1, cbar=True,
+            xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'],
+            annot_kws={'size': 16, 'weight': 'bold'})
+ax1.set_title('Logistic Regression\nConfusion Matrix', fontsize=14, fontweight='bold')
+ax1.set_ylabel('True Label', fontsize=12, fontweight='bold')
+ax1.set_xlabel('Predicted Label', fontsize=12, fontweight='bold')
+
+# Confusion Matrix 2: Decision Tree
+cm_dt = confusion_matrix(y_test, dt_pred)
+ax2 = axes[1]
+sns.heatmap(cm_dt, annot=True, fmt='d', cmap='Reds', ax=ax2, cbar=True,
+            xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'],
+            annot_kws={'size': 16, 'weight': 'bold'})
+ax2.set_title('Decision Tree\nConfusion Matrix', fontsize=14, fontweight='bold')
+ax2.set_ylabel('True Label', fontsize=12, fontweight='bold')
+ax2.set_xlabel('Predicted Label', fontsize=12, fontweight='bold')
+
+# Confusion Matrix 3: Random Forest
+cm_rf = confusion_matrix(y_test, rf_pred)
+ax3 = axes[2]
+sns.heatmap(cm_rf, annot=True, fmt='d', cmap='Greens', ax=ax3, cbar=True,
+            xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'],
+            annot_kws={'size': 16, 'weight': 'bold'})
+ax3.set_title('Random Forest\nConfusion Matrix', fontsize=14, fontweight='bold')
+ax3.set_ylabel('True Label', fontsize=12, fontweight='bold')
+ax3.set_xlabel('Predicted Label', fontsize=12, fontweight='bold')
+
+plt.tight_layout()
+plt.savefig('/content/drive/MyDrive/confusion_matrices_baseline.png', dpi=300, bbox_inches='tight')
+print("✓ Confusion matrices saved to Google Drive")
+plt.show()
+
+# Print classification metrics for each model
+print("\n" + "="*70)
+print("DETAILED METRICS FROM CONFUSION MATRICES")
+print("="*70)
+
+for model_name, cm, pred in [('Logistic Regression', cm_lr, lr_pred),
+                               ('Decision Tree', cm_dt, dt_pred),
+                               ('Random Forest', cm_rf, rf_pred)]:
+    tn, fp, fn, tp = cm.ravel()
+    print(f"\n{model_name}:")
+    print(f"  True Negatives:  {tn}")
+    print(f"  False Positives: {fp}")
+    print(f"  False Negatives: {fn}")
+    print(f"  True Positives:  {tp}")
+    print(f"  Total Correct:   {tn + tp} / {len(y_test)}")
