@@ -1,0 +1,54 @@
+# ========== ULTRA-OPTIMIZED RANDOM FOREST ==========
+
+from sklearn.ensemble import RandomForestClassifier
+
+print("="*70)
+print("IMPROVEMENT 1: ULTRA-OPTIMIZED RANDOM FOREST")
+print("="*70)
+
+print("\nTraining Random Forest with aggressive anti-overfitting...")
+
+# Key changes from baseline:
+# 1. 500 trees (more averaging)
+# 2. max_depth=20 (prevent deep overfitting)
+# 3. min_samples_split=15 (require more samples)
+# 4. min_samples_leaf=5 (bigger leaves)
+# 5. max_features='log2' (fewer features per tree)
+# 6. max_samples=0.7 (bootstrap 70% of data)
+
+rf_ultra = RandomForestClassifier(
+    n_estimators=500,              # MORE trees for better averaging
+    max_depth=20,                  # LIMIT depth (baseline had NO limit → overfitting)
+    min_samples_split=15,          # REQUIRE more samples to split (baseline: 2)
+    min_samples_leaf=5,            # BIGGER leaves (baseline: 1)
+    max_features='log2',           # FEWER features per split (baseline: 'sqrt')
+    max_samples=0.7,               # Bootstrap 70% (adds randomness)
+    bootstrap=True,
+    class_weight='balanced',       # NEW: balance classes
+    criterion='gini',
+    random_state=42,
+    n_jobs=-1,
+    verbose=0,
+    warm_start=False
+)
+
+print("  Training on combined features...")
+rf_ultra.fit(X_train_combined, y_train)
+rf_ultra_pred = rf_ultra.predict(X_test_combined)
+
+rf_ultra_precision = precision_score(y_test, rf_ultra_pred)
+rf_ultra_recall = recall_score(y_test, rf_ultra_pred)
+rf_ultra_f1 = f1_score(y_test, rf_ultra_pred)
+
+print(f"\n✓ ULTRA-OPTIMIZED Random Forest Results:")
+print(f"  Precision: {rf_ultra_precision:.4f} (Baseline: 0.857)")
+print(f"  Recall:    {rf_ultra_recall:.4f} (Baseline: 0.839)")
+print(f"  F1-Score:  {rf_ultra_f1:.4f} (Baseline: 0.848)")
+print(f"  Improvement: {((rf_ultra_f1 - 0.848) / 0.848 * 100):+.2f}%")
+
+print(f"\n📊 Model Statistics:")
+print(f"  Number of trees: {rf_ultra.n_estimators}")
+print(f"  Max depth: {rf_ultra.max_depth}")
+print(f"  Features per split: log2({X_train_combined.shape[1]}) ≈ {int(np.log2(X_train_combined.shape[1]))}")
+print("="*70)
+
