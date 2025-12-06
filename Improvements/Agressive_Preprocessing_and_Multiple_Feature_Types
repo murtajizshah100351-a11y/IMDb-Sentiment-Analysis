@@ -1,0 +1,152 @@
+# ========== AGGRESSIVE PREPROCESSING + MULTIPLE FEATURE TYPES ==========
+
+import re
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from textblob import TextBlob
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
+import warnings
+warnings.filterwarnings('ignore')
+
+# Downloads
+nltk.download('vader_lexicon', quiet=True)
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
+
+print("="*70)
+print("STEP 1: ULTRA-AGGRESSIVE FEATURE ENGINEERING")
+print("="*70)
+
+def aggressive_clean_text(text):
+    """Ultra-aggressive cleaning"""
+    if not isinstance(text, str):
+        return ""
+    
+    text = re.sub(r'http\S+|www\.\S+|<.*?>|\S+@\S+', '', text)
+    text = re.sub(r'\d+', '', text)
+    
+    contractions = {
+        "ain't": "am not", "aren't": "are not", "can't": "cannot",
+        "couldn't": "could not", "didn't": "did not", "doesn't": "does not",
+        "don't": "do not", "hadn't": "had not", "hasn't": "has not",
+        "haven't": "have not", "he'd": "he would", "he'll": "he will",
+        "he's": "he is", "i'd": "i would", "i'll": "i will", "i'm": "i am",
+        "i've": "i have", "isn't": "is not", "it's": "it is",
+        "let's": "let us", "shouldn't": "should not", "that's": "that is",
+        "they'd": "they would", "they'll": "they will", "they're": "they are",
+        "they've": "they have", "wasn't": "was not", "we'd": "we would",
+        "we'll": "we will", "we're": "we are", "we've": "we have",
+        "weren't": "were not", "what's": "what is", "won't": "will not",
+        "wouldn't": "would not", "you'd": "you would", "you'll": "you will",
+        "you're": "you are", "you've": "you have"
+    }
+    
+    for cont, exp in contractions.items():
+        text = re.sub(r'\b' + cont + r'\b', exp, text, flags=re.IGNORECASE)
+    
+    # Preserve negations
+    text = text.replace("not ", "not_")
+    text = text.replace("no ", "no_")
+    text = text.replace("never ", "never_")
+    
+    text = text.lower()
+    text = re.sub(r'[^a-z\s_]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    return text
+
+# Apply preprocessing
+print("\nApplying preprocessing...")
+X_train_processed = X_train.apply(aggressive_clean_text)
+X_test_processed = X_test.apply(aggressive_clean_text)
+print("✓ Preprocessing complete")
+
+# ========== FEATURE SET 1: VADER SENTIMENT ==========
+print("\nExtracting VADER sentiment features...")
+sia = SentimentIntensityAnalyzer()
+
+def extract_vader_features(text):
+    scores = sia.polarity_scores(text)
+    return [scores['neg'], scores['neu'], scores['pos'], scores['compound']]
+
+vader_train = np.array([extract_vader_features(text) for text in X_train])
+vader_test = np.array([extract_vader_features(text) for text in X_test])
+print(f"✓ VADER features: {vader_train.shape}")
+
+# ========== FEATURE SET 2: TEXTBLOB POLARITY & SUBJECTIVITY ==========
+print("\nExtracting TextBlob sentiment features...")
+
+def extract_textblob_features(text):
+    blob = TextBlob(text)
+    return [blob.sentiment.polarity, blob.sentiment.subjectivity]
+
+textblob_train = np.array([extract_textblob_features(text) for text in X_train])
+textblob_test = np.array([extract_textblob_features(text) for text in X_test])
+print(f"✓ TextBlob features: {textblob_train.shape}")
+
+# ========== FEATURE SET 3: STATISTICAL TEXT FEATURES ==========
+print("\nExtracting statistical text features...")
+
+def extract_statistical_features(text):
+    """Extract length, word count, avg word length, exclamation/question marks"""
+    words = text.split()
+    return [
+        len(text),                                      # Character count
+        len(words),                                     # Word count
+        np.mean([len(w) for w in words]) if words else 0,  # Avg word length
+        text.count('!'),                                # Exclamation marks
+        text.count('?'),                                # Question marks
+        len([w for w in words if len(w) > 6])          # Long words (>6 chars)
+    ]
+
+stat_train = np.array([extract_statistical_features(text) for text in X_train])
+stat_test = np.array([extract_statistical_features(text) for text in X_test])
+print(f"✓ Statistical features: {stat_train.shape}")
+
+# ========== COMBINE ALL NUMERICAL FEATURES ==========
+numerical_train = np.hstack([vader_train, textblob_train, stat_train])
+numerical_test = np.hstack([vader_test, textblob_test, stat_test])
+
+# Normalize
+scaler = StandardScaler()
+numerical_train_scaled = scaler.fit_transform(numerical_train)
+numerical_test_scaled = scaler.transform(numerical_test)
+
+print(f"✓ Total numerical features: {numerical_train_scaled.shape[1]}")
+print(f"  - VADER: 4")
+print(f"  - TextBlob: 2")
+print(f"  - Statistical: 6")
+
+# ========== FEATURE SET 4: ENHANCED TF-IDF ==========
+from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import hstack
+
+print("\nTraining enhanced TF-IDF...")
+vectorizer_enhanced = TfidfVectorizer(
+    max_features=12000,      # Reduced from 15000 for tree models
+    ngram_range=(1, 3),
+    min_df=3,
+    max_df=0.9,
+    sublinear_tf=True,
+    strip_accents='unicode',
+    lowercase=True,
+    stop_words='english',
+    use_idf=True,
+    smooth_idf=True,
+    norm='l2'
+)
+
+X_train_tfidf = vectorizer_enhanced.fit_transform(X_train_processed)
+X_test_tfidf = vectorizer_enhanced.transform(X_test_processed)
+print(f"✓ TF-IDF features: {X_train_tfidf.shape[1]}")
+
+# ========== COMBINE ALL FEATURES ==========
+print("\nCombining all features...")
+X_train_combined = hstack([X_train_tfidf, numerical_train_scaled])
+X_test_combined = hstack([X_test_tfidf, numerical_test_scaled])
+
+print(f"✓ TOTAL COMBINED FEATURES: {X_train_combined.shape[1]}")
+print("="*70)
+
