@@ -1,0 +1,51 @@
+# ========== ULTRA-OPTIMIZED DECISION TREE ==========
+
+from sklearn.tree import DecisionTreeClassifier
+
+print("="*70)
+print("IMPROVEMENT 2: ULTRA-OPTIMIZED DECISION TREE")
+print("="*70)
+
+print("\nTraining Decision Tree with aggressive pruning...")
+
+# Key changes from baseline:
+# 1. max_depth=15 (MUCH shallower than baseline's unlimited)
+# 2. min_samples_split=20 (require LOTS of samples to split)
+# 3. min_samples_leaf=10 (BIG leaves)
+# 4. max_features=0.3 (use only 30% of features)
+# 5. min_impurity_decrease=0.0001 (require significant improvement to split)
+# 6. ccp_alpha=0.001 (cost-complexity pruning)
+
+dt_ultra = DecisionTreeClassifier(
+    max_depth=15,                  # SHALLOW tree (baseline: unlimited → severe overfitting)
+    min_samples_split=20,          # REQUIRE lots of samples (baseline: 2)
+    min_samples_leaf=10,           # BIG leaves (baseline: 1)
+    max_features=0.3,              # Use only 30% of features (baseline: all)
+    min_impurity_decrease=0.0001,  # Require improvement to split
+    ccp_alpha=0.001,               # Cost-complexity pruning (NEW)
+    criterion='gini',
+    splitter='best',
+    class_weight='balanced',       # NEW: balance classes
+    random_state=42
+)
+
+print("  Training on combined features...")
+dt_ultra.fit(X_train_combined, y_train)
+dt_ultra_pred = dt_ultra.predict(X_test_combined)
+
+dt_ultra_precision = precision_score(y_test, dt_ultra_pred)
+dt_ultra_recall = recall_score(y_test, dt_ultra_pred)
+dt_ultra_f1 = f1_score(y_test, dt_ultra_pred)
+
+print(f"\n✓ ULTRA-OPTIMIZED Decision Tree Results:")
+print(f"  Precision: {dt_ultra_precision:.4f} (Baseline: 0.716)")
+print(f"  Recall:    {dt_ultra_recall:.4f} (Baseline: 0.711)")
+print(f"  F1-Score:  {dt_ultra_f1:.4f} (Baseline: 0.714)")
+print(f"  Improvement: {((dt_ultra_f1 - 0.714) / 0.714 * 100):+.2f}%")
+
+print(f"\n📊 Tree Statistics:")
+print(f"  Actual max depth: {dt_ultra.get_depth()} (limit: {dt_ultra.max_depth})")
+print(f"  Number of leaves: {dt_ultra.get_n_leaves()}")
+print(f"  Number of features used: ~{int(X_train_combined.shape[1] * 0.3)}")
+print("="*70)
+
