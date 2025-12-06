@@ -1,0 +1,33 @@
+# ========== OPTIMIZED LOGISTIC REGRESSION ==========
+
+from sklearn.linear_model import LogisticRegression
+
+print("="*70)
+print("IMPROVEMENT 3: OPTIMIZED LOGISTIC REGRESSION")
+print("="*70)
+
+print("\nTraining optimized Logistic Regression...")
+lr_optimized = LogisticRegression(
+    C=5.0,
+    solver='saga',
+    max_iter=1000,
+    penalty='l2',
+    class_weight='balanced',
+    random_state=42,
+    n_jobs=-1
+)
+
+lr_optimized.fit(X_train_combined, y_train)
+lr_opt_pred = lr_optimized.predict(X_test_combined)
+
+lr_opt_precision = precision_score(y_test, lr_opt_pred)
+lr_opt_recall = recall_score(y_test, lr_opt_pred)
+lr_opt_f1 = f1_score(y_test, lr_opt_pred)
+
+print(f"\n✓ Optimized Logistic Regression Results:")
+print(f"  Precision: {lr_opt_precision:.4f} (Baseline: 0.887)")
+print(f"  Recall:    {lr_opt_recall:.4f} (Baseline: 0.909)")
+print(f"  F1-Score:  {lr_opt_f1:.4f} (Baseline: 0.898)")
+print(f"  Improvement: {((lr_opt_f1 - 0.898) / 0.898 * 100):+.2f}%")
+print("="*70)
+
